@@ -1,0 +1,7 @@
+.vscode
+temp
+db-users
+db-cache
+*.md
+*.yml
+*.yaml

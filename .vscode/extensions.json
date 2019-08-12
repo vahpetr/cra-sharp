@@ -1,0 +1,26 @@
+{
+  "recommendations": [
+    "aaron-bond.better-comments",
+    "blanu.vscode-styled-jsx",
+    "christian-kohler.npm-intellisense",
+    "CoenraadS.bracket-pair-colorizer",
+    "DavidAnson.vscode-markdownlint",
+    "donjayamanne.githistory",
+    "DotJoshJohnson.xml",
+    "eamodio.gitlens",
+    "EditorConfig.EditorConfig",
+    "esbenp.prettier-vscode",
+    "ewnd9.open-node-modules",
+    "jpoissonnier.vscode-styled-components",
+    "kisstkondoros.vscode-codemetrics",
+    "leopotam.csharpfixformat",
+    "oderwat.indent-rainbow",
+    "Orta.vscode-jest",
+    "pflannery.vscode-versionlens",
+    "rtbenfield.vscode-jest-test-adapter",
+    "shinnn.stylelint",
+    "streetsidesoftware.code-spell-checker",
+    "vscode-icons-team.vscode-icons",
+    "wix.vscode-import-cost"
+  ]
+}

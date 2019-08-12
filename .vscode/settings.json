@@ -1,0 +1,12 @@
+{
+  "javascript.validate.enable": false,
+  "editor.formatOnSave": false,
+  "[javascript]": {
+    "editor.formatOnSave": true
+  },
+  "prettier.eslintIntegration": true,
+  "css.validate": false,
+  "[css]": {
+    "editor.formatOnSave": true
+  }
+}

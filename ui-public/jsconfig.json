@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "baseUrl": "src",
+    "target": "es2018",
+    "experimentalDecorators": true,
+    "moduleResolution": "node",
+    "jsx": "react",
+    "sourceMap": true,
+    "emitDecoratorMetadata": true,
+    "removeComments": false,
+    "outDir": "dist",
+    "allowUnusedLabels": false,
+    "noImplicitReturns": true,
+    "noUnusedParameters": true,
+    "noUnusedLocals": true,
+    "lib": ["es7", "dom"],
+    "pretty": true,
+    "allowSyntheticDefaultImports": false
+  },
+  "exclude": [
+    "build",
+    "coverage",
+    "node_modules",
+    "public"
+  ],
+  "include": ["src", "tests/PublicApp.test.jsx"]
+}
