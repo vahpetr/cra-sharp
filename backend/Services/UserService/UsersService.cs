@@ -78,17 +78,12 @@ namespace Backend.Services.UserService {
             };
             await _cache.SetStringAsync (activationToken, email, options, ct);
 
-            try {
-                await _emailService.SendEmailAsync (
-                    email,
-                    "Account activation",
-                    $"{_options.Value.PublicUrl}/registration/activation/{activationToken}",
-                    ct
-                );
-            } catch (Exception ex) {
-                Console.WriteLine (ex);
-                Console.WriteLine ($"{email}: {activationToken}");
-            }
+            await _emailService.SendEmailAsync (
+                email,
+                "Account activation",
+                $"{_options.Value.PublicUrl}/registration/activation/{activationToken}",
+                ct
+            );
 
             return _mapper.Map<UserDto> (user);
         }
