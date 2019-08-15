@@ -85,8 +85,8 @@ namespace Backend.Services.UserService {
                     $"{_options.Value.PublicUrl}/registration/activation/{activationToken}",
                     ct
                 );
-            } catch (Exception) {
-                throw new ServiceException ("Smtp server configured incorrect.");
+            } catch (Exception ex) {
+                throw new ServiceException ($"Smtp server problem ({ex.Message}).");
             }
 
             return _mapper.Map<UserDto> (user);
