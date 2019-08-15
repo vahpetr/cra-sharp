@@ -22,7 +22,7 @@
   "scripts": {
     "start": "REACT_APP_API_HOST=localhost:5000 react-scripts start",
     "build": "GENERATE_SOURCEMAP=false react-scripts build",
-    "test": "CI=true react-scripts test --env=jsdom",
+    "test": "REACT_APP_API_HOST=localhost:5000 CI=true react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
     "lint": "eslint ./src/"
   },

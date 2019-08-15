@@ -74,7 +74,7 @@ export default class DashboardPage extends React.Component {
               Bill is a cat.
             </div>
           </Content>
-          <Footer style={{ textAlign: 'center' }}>Footer ©2019</Footer>
+          <Footer style={{ textAlign: 'center' }}>Footer © 2019</Footer>
         </Layout>
       </Layout>
     );

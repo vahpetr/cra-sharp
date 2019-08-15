@@ -6,7 +6,7 @@ NOT COMPLETED PROJECT
 ## How run
 
 1. Setup .env file (in real app this file must be ignore)
-1. `docker-compose run`
+1. `docker-compose up --build`
 1. `open http://localhost:5000`
 
 ## TODO

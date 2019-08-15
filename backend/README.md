@@ -2,6 +2,10 @@
 
 ASP.NET Core 2.2 + React + Custom Jwt authorization. In Real app i think need use Identity.
 
+## Run
+
+Open vscode, press F5
+
 ## TODO
 
 1. Add [PasswordHasher](https://docs.microsoft.com/ru-ru/aspnet/core/security/data-protection/consumer-apis/password-hashing?view=aspnetcore-2.2)

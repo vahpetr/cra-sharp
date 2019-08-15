@@ -78,12 +78,16 @@ namespace Backend.Services.UserService {
             };
             await _cache.SetStringAsync (activationToken, email, options, ct);
 
-            await _emailService.SendEmailAsync (
-                email,
-                "Account activation",
-                $"{_options.Value.PublicUrl}/registration/activation/{activationToken}",
-                ct
-            );
+            try {
+                await _emailService.SendEmailAsync (
+                    email,
+                    "Account activation",
+                    $"{_options.Value.PublicUrl}/registration/activation/{activationToken}",
+                    ct
+                );
+            } catch (Exception) {
+                throw new ServiceException ("Smtp server configured incorrect.");
+            }
 
             return _mapper.Map<UserDto> (user);
         }

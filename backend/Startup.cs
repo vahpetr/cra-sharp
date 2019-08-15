@@ -172,7 +172,7 @@ namespace Backend {
                 .AllowAnyOrigin ()
                 .AllowAnyMethod ()
                 .AllowAnyHeader ()
-                .AllowCredentials()
+                .AllowCredentials ()
             );
 
             // TODO rewrite to async redirect?
@@ -203,7 +203,19 @@ namespace Backend {
                 await next ();
             });
 
-            app.UseMvcWithDefaultRoute ();
+            app.UseMvc (routes => {
+                routes.MapRoute (
+                    name: "default",
+                    template: "{controller}/{action}/{id?}",
+                    defaults : new { controller = "Home", action = "Index" }
+                );
+
+                routes.MapRoute (
+                    name: "fallback",
+                    template: "{*slug}",
+                    defaults : new { controller = "Home", action = "Index" }
+                );
+            });
 
             _logger.LogError (LoggingEvents.ProcessStarted, "Backend started!");
         }
