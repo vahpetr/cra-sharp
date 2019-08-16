@@ -11,6 +11,7 @@ NOT COMPLETED PROJECT
 
 ## TODO
 
+1. For load html need add [Cookie auth](https://oloshcoder.com/2018/05/21/jwt-token-with-cookie-authentication-in-asp-net-core/)
 1. Enable auto reconnect on redis
 1. Add more test
 1. [Add swagger](https://docs.microsoft.com/ru-ru/aspnet/core/tutorials/getting-started-with-swashbuckle?view=aspnetcore-2.2&tabs=visual-studio)
