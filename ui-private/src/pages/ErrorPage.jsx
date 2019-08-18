@@ -11,7 +11,7 @@ export default class ErrorPage extends React.Component {
     return (
       <StyledContainer>
         <div>
-          <StyledMessage>Старница не найденна</StyledMessage>
+          <StyledMessage>Старница не найдена</StyledMessage>
           <Button onClick={this.props.history.goBack}>Вернуться назад</Button>
         </div>
       </StyledContainer>

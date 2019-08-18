@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
 namespace Backend.ViewModels {
@@ -7,5 +8,8 @@ namespace Backend.ViewModels {
 
         [Required, MinLength (8), MaxLength (64), DataType (DataType.Password)]
         public string Password { get; set; }
+
+        [DefaultValue(true)]
+        public bool RememberMe { get; set; }
     }
 }

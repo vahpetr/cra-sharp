@@ -4,8 +4,7 @@ const META_DATA_HEADERS = {
 };
 
 const JSON_HEADERS = {
-  accept: 'application/json',
-  'content-type': 'application/json;charset=UTF-8'
+  'content-type': 'application/json'
 };
 
 export default class UsersProvider {
@@ -20,7 +19,7 @@ export default class UsersProvider {
   }
 
   async registration(email, password, signal) {
-    await this._transport.post('/api/users/registration', {
+    return await this._transport.post('/api/users/registration', {
       body: JSON.stringify({ email, password }),
       headers: jsonHeaders(),
       signal
@@ -28,42 +27,25 @@ export default class UsersProvider {
   }
 
   async registrationConfirm(activationToken, signal) {
-    const authorization = await this._transport.post(
-      '/api/users/registration/confirm',
-      {
-        body: JSON.stringify({ activationToken }),
-        headers: jsonHeaders(),
-        signal
-      }
-    );
-    return Object.assign(authorization, {
-      user: mapUser(parseJwtToken(authorization.accessToken))
-    });
-  }
-
-  async login(email, password, signal) {
-    const authorization = await this._transport.post('/api/users/login', {
-      body: JSON.stringify({ email, password }),
+    return await this._transport.post('/api/users/registration/confirm', {
+      body: JSON.stringify({ activationToken }),
       headers: jsonHeaders(),
+      credentials: 'same-origin',
       signal
     });
-    return Object.assign(authorization, {
-      user: mapUser(parseJwtToken(authorization.accessToken))
+  }
+
+  async login(email, password, rememberMe, signal) {
+    return await this._transport.post('/api/users/login', {
+      body: JSON.stringify({ email, password, rememberMe }),
+      headers: jsonHeaders(),
+      credentials: 'same-origin',
+      signal
     });
   }
 }
 
-function parseJwtToken(auth) {
-  const [, base64Url] = auth.split('.');
-  const base64 = base64Url.replace('-', '+').replace('_', '/');
-  return JSON.parse(atob(base64));
-}
-
-function mapUser(data) {
-  return {};
-}
-
-function textHeaders() {
+function infoHeaders() {
   return {
     ...META_DATA_HEADERS,
     'x-request-id': Date.now()
@@ -73,6 +55,6 @@ function textHeaders() {
 function jsonHeaders() {
   return {
     ...JSON_HEADERS,
-    ...textHeaders()
+    ...infoHeaders()
   };
 }

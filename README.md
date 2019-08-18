@@ -1,7 +1,7 @@
 # create-react-core
 
-Example project on asp net core 2.2, react(create react app + styled components), postgres, redis, docker.
-NOT COMPLETED PROJECT
+Example project on asp net core 2.2, react(create react app + styled components + antd), postgres, redis, docker.
+I think in real application, you need to use Identity and a separate frontend project, do not public sourcemap, and not divide the frontend into two independent parts.
 
 ## How run
 

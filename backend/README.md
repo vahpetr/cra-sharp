@@ -9,9 +9,10 @@ Open vscode, press F5
 ## TODO
 
 1. Add [PasswordHasher](https://docs.microsoft.com/ru-ru/aspnet/core/security/data-protection/consumer-apis/password-hashing?view=aspnetcore-2.2)
-1. Add logging
+1. Add [canceling jwt tokens](https://piotrgankiewicz.com/2018/04/25/canceling-jwt-tokens-in-net-core/)
+1. Configure AddCookie options return url handler to lower case
+1. Add health check database
 1. Add more tests
-1. Add url id validation
 
 ## Examples
 

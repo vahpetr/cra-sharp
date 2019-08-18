@@ -3,3 +3,5 @@ obj
 wwwroot
 appsettings.Development.json
 out
+healthchecksdb
+*.md

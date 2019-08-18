@@ -99,12 +99,17 @@ export default class LoginPage extends React.Component {
     return !validated || isValid;
   };
 
-  async login(email, password) {
+  async login(email, password, rememberMe) {
     try {
       this.abortController.abort();
       this.setState({ loading: true });
       this.abortController = new AbortController();
-      await Application.login(email, password, this.abortController.signal);
+      await Application.login(
+        email,
+        password,
+        rememberMe,
+        this.abortController.signal
+      );
       window.location.href = window.location.origin;
     } catch (error) {
       // eslint-disable-next-line no-console

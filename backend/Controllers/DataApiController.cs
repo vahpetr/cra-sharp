@@ -1,22 +1,18 @@
-using System;
-using System.Threading;
-using System.Threading.Tasks;
-using Backend.Services.UserService;
-using Backend.ViewModels;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 
 namespace Backend.Controllers {
     [ApiController]
     [Route ("api/data")]
+    [Produces ("application/json")]
     public class DataApiController : ControllerBase {
         public DataApiController () { }
 
-        [Authorize]
+        [Authorize (AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpGet]
         public string Get () {
-            return "Secret service data";
+            return "Перед собой вы видите текст с сервера доступный только авторизованному пользователю и полученный через защищённый метод API.";
         }
     }
 }

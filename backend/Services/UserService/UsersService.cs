@@ -72,19 +72,23 @@ namespace Backend.Services.UserService {
 
             _logger.LogInformation (LoggingEvents.AddItem, "Register user {id} start.", user.Id);
 
-            var activationToken = Guid.NewGuid ().ToString ("N");
+            var activationToken = Guid.NewGuid ().ToString ();
             var options = new DistributedCacheEntryOptions {
                 AbsoluteExpirationRelativeToNow = TimeSpan.FromDays (1)
             };
             await _cache.SetStringAsync (activationToken, email, options, ct);
 
             try {
-                await _emailService.SendEmailAsync (
-                    email,
-                    "Account activation",
-                    $"{_options.Value.PublicUrl}/registration/activation/{activationToken}",
-                    ct
-                );
+                var subject = "Account activation";
+                var message = $"{_options.Value.PublicUrl}/registration/activation/{activationToken}";
+                _logger.LogDebug ("Sending email with subject {subject} and {message}.", subject, message);
+
+                // ONLY FOR EXAMPLE, REMOVE TRY-CATCH IN REAL PROJECT
+                try {
+                    await _emailService.SendEmailAsync (email, subject, message, ct);
+                } catch (Exception) {
+                    Console.WriteLine (message);
+                }
             } catch (Exception ex) {
                 throw new ServiceException ($"Smtp server problem ({ex.Message}).");
             }
@@ -92,9 +96,31 @@ namespace Backend.Services.UserService {
             return _mapper.Map<UserDto> (user);
         }
 
-        public async Task<string> RegistrationConfirmAsync (Guid activationToken, CancellationToken ct) {
+        public async Task ResendActivationTokenAsync (string email, CancellationToken ct) {
+            UserService.VaildateEmail (email);
+
+            var notracking = _context.Users.AsQueryable ().AsNoTracking ();
+
+            var user = await notracking.FirstOrDefaultAsync (p => p.Email == email, ct);
+            if (user is null) {
+                throw new ServiceNotFoundException ($"Email {email} is not registered.");
+            }
+            if (user.IsActivated) {
+                throw new ServiceException ($"User {email} has been activated.");
+            }
+
+            var activationToken = Guid.NewGuid ().ToString ();
+            var options = new DistributedCacheEntryOptions {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromDays (1)
+            };
+            await _cache.SetStringAsync (activationToken, email, options, ct);
+
+            _logger.LogInformation (LoggingEvents.UpdateItem, "Resend registration token for {email}.", email);
+        }
+
+        public async Task<AuthorizationDto> RegistrationConfirmAsync (Guid activationToken, string authenticationType, CancellationToken ct) {
             using (_logger.BeginScope ("Registration confirm scope")) {
-                var key = activationToken.ToString ("N");
+                var key = activationToken.ToString ();
                 var email = await _cache.GetStringAsync (key, ct);
                 if (email is null) {
                     throw new ServiceNotFoundException ("Activation token expired or incorrect.");
@@ -115,42 +141,39 @@ namespace Backend.Services.UserService {
 
                 await _context.SaveChangesAsync (ct);
 
-                var accessToken = CreateAccessToken (user);
+                var jit = Guid.NewGuid ().ToString ();
+                var (accessToken, expires) = CreateAccessToken (user, jit);
+                var claimsPrincipal = CreateClaimsPrincipal (user, jit, authenticationType);
+                var authorization = new AuthorizationDto () {
+                    AccessToken = accessToken,
+                    ClaimsPrincipal = claimsPrincipal,
+                    ExpirationIn = expires
+                };
 
                 await _cache.RemoveAsync (key, ct);
 
                 _logger.LogInformation (LoggingEvents.UpdateItem, "Register user {id} success.", user.Id);
 
-                return accessToken;
+                return authorization;
             }
         }
 
-        public async Task ResendRegistrationConfirmAsync (string email, CancellationToken ct) {
-            UserService.VaildateEmail (email);
+        public async Task<UserDto> GetUserAsync (Guid id, CancellationToken ct) {
+            _logger.LogInformation (LoggingEvents.GetItem, "Getting user {Id}", id);
 
+            var notracking = _context.Users.AsQueryable ().AsNoTracking ();
+            var user = await notracking.ProjectTo<UserDto> ().FirstOrDefaultAsync (p => p.Id == id, ct);
+            if (user is null) {
+                throw new ServiceNotFoundException ($"User {id} not found.");
+            }
+
+            return user;
+        }
+
+        public async Task < (string, DateTime) > GetAccessTokenAsync (string email, string password, CancellationToken ct) {
             var notracking = _context.Users.AsQueryable ().AsNoTracking ();
 
             var user = await notracking.FirstOrDefaultAsync (p => p.Email == email, ct);
-            if (user is null) {
-                throw new ServiceNotFoundException ($"Email {email} is not registered.");
-            }
-            if (user.IsActivated) {
-                throw new ServiceException ($"User {email} has been activated.");
-            }
-
-            var activationToken = Guid.NewGuid ().ToString ("N");
-            var options = new DistributedCacheEntryOptions {
-                AbsoluteExpirationRelativeToNow = TimeSpan.FromDays (1)
-            };
-            await _cache.SetStringAsync (activationToken, email, options, ct);
-
-            _logger.LogInformation (LoggingEvents.UpdateItem, "Resend registration token for {email}.", email);
-        }
-
-        public async Task<string> GetAccessTokenAsync (string email, string password, CancellationToken ct) {
-            var tracking = _context.Users.AsQueryable ();
-
-            var user = await tracking.FirstOrDefaultAsync (p => p.Email == email, ct);
             if (user is null) {
                 throw new ServiceException ("Incorrect login or password.");
             }
@@ -162,26 +185,101 @@ namespace Backend.Services.UserService {
                 throw new ServiceException ($"User {email} is not confirmed.");
             }
 
-            user.UpdatedAt = DateTime.UtcNow;
+            var jit = Guid.NewGuid ().ToString ();
+            var (accessToken, expires) = CreateAccessToken (user, jit);
 
-            await _context.SaveChangesAsync (ct);
+            _logger.LogInformation (LoggingEvents.GetItem, "Get access token {email}.", email);
 
-            var accessToken = CreateAccessToken (user);
+            return (accessToken, expires);
+        }
+
+        public async Task<ClaimsPrincipal> GetClaimsPrincipalAsync (string email, string password, string authenticationType, CancellationToken ct) {
+            var notracking = _context.Users.AsQueryable ().AsNoTracking ();
+            var user = await notracking.FirstOrDefaultAsync (p => p.Email == email, ct);
+            if (user is null) {
+                throw new ServiceException ("Incorrect login or password.");
+            }
+            // TODO add PasswordHasher
+            if (user.Password != password) {
+                throw new ServiceException ("Incorrect login or password.");
+            }
+            if (!user.IsActivated) {
+                throw new ServiceException ($"User {email} is not confirmed.");
+            }
+
+            var jit = Guid.NewGuid ().ToString ();
+            var principal = CreateClaimsPrincipal (user, jit, authenticationType);
+
+            _logger.LogInformation (LoggingEvents.UpdateItem, "Get claims principal user {id} success.", user.Id);
+
+            return principal;
+        }
+
+        public async Task<AuthorizationDto> GetAuthorizationAsync (string email, string password, string authenticationType, CancellationToken ct) {
+            var notracking = _context.Users.AsQueryable ().AsNoTracking ();
+
+            var user = await notracking.FirstOrDefaultAsync (p => p.Email == email, ct);
+            if (user is null) {
+                throw new ServiceException ("Incorrect login or password.");
+            }
+            // TODO add PasswordHasher
+            if (user.Password != password) {
+                throw new ServiceException ("Incorrect login or password.");
+            }
+            if (!user.IsActivated) {
+                throw new ServiceException ($"User {email} is not confirmed.");
+            }
+
+            var jit = Guid.NewGuid ().ToString ();
+            var (accessToken, expires) = CreateAccessToken (user, jit);
+            var claimsPrincipal = CreateClaimsPrincipal (user, jit, authenticationType);
+            var authorization = new AuthorizationDto () {
+                AccessToken = accessToken,
+                ClaimsPrincipal = claimsPrincipal,
+                ExpirationIn = expires
+            };
 
             _logger.LogInformation (LoggingEvents.GetItem, "User login {email}.", email);
 
-            return accessToken;
+            return authorization;
         }
 
-        public async Task<UserDto> GetUserAsync (Guid id, CancellationToken ct) {
-            _logger.LogInformation (LoggingEvents.GetItem, "Getting user {Id}", id);
-            var notracking = _context.Users.AsQueryable ().AsNoTracking ();
-            var user = await notracking.ProjectTo<UserDto> ().FirstOrDefaultAsync (p => p.Id == id, ct);
-            if (user is null) {
-                throw new ServiceNotFoundException ($"User {id} not found.");
-            }
+        public async Task<T> CreateTransactionAsync<T> (Func<Task<T>> action, CancellationToken ct) {
+            return await ResilientTransaction.New (_context).ExecuteAsync (action, ct);
+        }
 
-            return user;
+        private Claim[] CreateClaims (User user, string jit) {
+            // https://ru.wikipedia.org/wiki/JSON_Web_Token
+            return new Claim[] {
+                new Claim (JwtRegisteredClaimNames.Jti, jit),
+                    new Claim (JwtRegisteredClaimNames.Sub, user.Id.ToString ()),
+                    new Claim (JwtRegisteredClaimNames.Email, user.Email),
+                    new Claim (ClaimTypes.Role, "User"),
+            };
+        }
+
+        private ClaimsPrincipal CreateClaimsPrincipal (User user, string jit, string authenticationType) {
+            var claims = CreateClaims (user, jit);
+            var claimsIdentity = new ClaimsIdentity (claims, authenticationType);
+            return new ClaimsPrincipal (claimsIdentity);
+        }
+
+        private (string, DateTime) CreateAccessToken (User user, string jit) {
+            var userSettings = _options.Value;
+            var notBefore = DateTime.UtcNow;
+            var expires = notBefore + TimeSpan.FromMinutes (userSettings.Lifespan);
+            var claims = CreateClaims (user, jit);
+            var signingCredentials = new SigningCredentials (userSettings.SymmetricSecurityKey, SecurityAlgorithms.HmacSha256);
+            var jwtSecurityToken = new JwtSecurityToken (
+                issuer: userSettings.Issuer,
+                audience: userSettings.Audience,
+                notBefore: notBefore,
+                claims: claims,
+                expires: expires,
+                signingCredentials: signingCredentials
+            );
+            var accessToken = new JwtSecurityTokenHandler ().WriteToken (jwtSecurityToken);
+            return (accessToken, expires);
         }
 
         static void VaildatePassword (string password) {
@@ -205,30 +303,6 @@ namespace Backend.Services.UserService {
             if (email.Equals ("not@email.unknown")) {
                 throw new ServiceException ("Email must be email.");
             }
-        }
-
-        private string CreateAccessToken (User user) {
-            var userSettings = _options.Value;
-            var claims = new Claim[] {
-                new Claim (JwtRegisteredClaimNames.Jti, user.Id.ToString ("N")),
-                new Claim (JwtRegisteredClaimNames.UniqueName, user.Email)
-            };
-            var notBefore = DateTime.UtcNow;
-            var expires = notBefore + TimeSpan.FromMinutes (userSettings.Lifespan);
-            var signingCredentials = new SigningCredentials (userSettings.SymmetricSecurityKey, SecurityAlgorithms.HmacSha256);
-            var jwt = new JwtSecurityToken (
-                issuer: userSettings.Issuer,
-                audience: userSettings.Audience,
-                notBefore: notBefore,
-                claims: claims,
-                expires: expires,
-                signingCredentials: signingCredentials
-            );
-            return new JwtSecurityTokenHandler ().WriteToken (jwt);
-        }
-
-        public async Task<T> CreateTransactionAsync<T> (Func<Task<T>> action, CancellationToken ct) {
-            return await ResilientTransaction.New (_context).ExecuteAsync (action, ct);
         }
     }
 }

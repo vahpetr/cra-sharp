@@ -7,6 +7,7 @@ using Backend.Services;
 using Backend.Services.EmailService;
 using Backend.Services.Exceptions;
 using Backend.Services.UserService;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics;
@@ -36,7 +37,6 @@ namespace Backend {
 
         public Startup (IConfiguration configuration) {
             _configuration = configuration;
-
         }
 
         public void ConfigureServices (IServiceCollection services) {
@@ -96,21 +96,28 @@ namespace Backend {
                 options.LowercaseQueryStrings = true;
             });
 
-            services.AddAuthentication (JwtBearerDefaults.AuthenticationScheme)
-                .AddJwtBearer (options => {
+            services
+                .AddAuthentication (o => {
+                    o.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                    o.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                    o.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                })
+                .AddCookie (options => {
+                    options.AccessDeniedPath = new PathString ("/login");
+                    options.LoginPath = new PathString ("/login");
+                })
+                .AddJwtBearer (JwtBearerDefaults.AuthenticationScheme, options => {
                     options.RequireHttpsMetadata = false;
                     options.SaveToken = true;
-                    options.ClaimsIssuer = userSettings.Issuer;
-                    options.Audience = userSettings.Audience;
                     options.TokenValidationParameters = new TokenValidationParameters {
+                        ValidIssuers = userSettings.Issuer.Split(","),
                         ValidateIssuer = false,
-                        ValidIssuer = userSettings.Issuer,
+                        ValidAudiences = userSettings.Audience.Split(","),
                         ValidateAudience = false,
-                        ValidAudience = userSettings.Audience,
-                        ValidateIssuerSigningKey = true,
                         IssuerSigningKey = userSettings.SymmetricSecurityKey,
-                        ValidateLifetime = true,
-                        ClockSkew = TimeSpan.FromMinutes (5)
+                        ValidateIssuerSigningKey = true,
+                        ClockSkew = TimeSpan.FromMinutes (5),
+                        ValidateLifetime = true
                     };
                 });
 
@@ -136,8 +143,6 @@ namespace Backend {
         public void Configure (IApplicationBuilder app, IHostingEnvironment env) {
             if (env.IsDevelopment ()) {
                 app.UseDeveloperExceptionPage ();
-            } else {
-                app.UseHsts ();
             }
 
             // TODO we can enable helcheck
@@ -175,14 +180,6 @@ namespace Backend {
                 .AllowCredentials ()
             );
 
-            // TODO rewrite to async redirect?
-            app.UseStatusCodePages (async context => {
-                var response = context.HttpContext.Response;
-                if (response.StatusCode == (int) HttpStatusCode.Unauthorized) {
-                    response.Redirect ("/login");
-                }
-            });
-
             app.UseAuthentication ();
 
             DefaultFilesOptions options = new DefaultFilesOptions ();
@@ -191,31 +188,7 @@ namespace Backend {
             app.UseDefaultFiles (options);
             app.UseStaticFiles ();
 
-            app.Use (async (context, next) => {
-                if (!context.User.Identity.IsAuthenticated && context.Request.Path.StartsWithSegments ("/private")) {
-                    // TODO check this
-                    context.Response.Redirect ("/login");
-                    // context.Response.StatusCode = (int) HttpStatusCode.Unauthorized;
-                    return;
-                }
-
-                // otherwise continue with the request pipeline
-                await next ();
-            });
-
-            app.UseMvc (routes => {
-                routes.MapRoute (
-                    name: "default",
-                    template: "{controller}/{action}/{id?}",
-                    defaults : new { controller = "Home", action = "Index" }
-                );
-
-                routes.MapRoute (
-                    name: "fallback",
-                    template: "{*slug}",
-                    defaults : new { controller = "Home", action = "Index" }
-                );
-            });
+            app.UseMvcWithDefaultRoute ();
 
             _logger.LogError (LoggingEvents.ProcessStarted, "Backend started!");
         }

@@ -21,13 +21,13 @@ export default class HttpTransport {
       break;
     default:
       if (
-        config.headers.accept &&
-          config.headers.accept.includes('application/json')
+        config.headers['content-type'] &&
+          config.headers['content-type'].includes('application/json')
       ) {
         const data = await response.json();
         if (data.error) {
           throw new Error(
-            data.message || data.error || 'Неизвестная ошибка.'
+            data.error || data.message || 'Неизвестная ошибка.'
           );
         }
 

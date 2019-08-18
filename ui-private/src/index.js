@@ -1,12 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import Application from './modules/Application';
 import App from './App';
 // import * as serviceWorker from 'serviceWorker';
-
-if (!Application.hasAccessToken()) {
-  window.location.href = `${window.location.origin}/login`;
-}
 
 ReactDOM.render(<App />, document.getElementById('root'));
 

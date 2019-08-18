@@ -5,3 +5,17 @@ db-cache
 *.md
 *.yml
 *.yaml
+ui-public/node_modules
+ui-public/build
+ui-public/coverage
+ui-private/node_modules
+ui-private/build
+ui-private/coverage
+backend/obj
+backend/bin
+backend/healthchecksdb
+backend/appsettings.Development.json
+backend/wwwroot/public
+backend/wwwroot/private
+backend-tests/obj
+backend-tests/bin

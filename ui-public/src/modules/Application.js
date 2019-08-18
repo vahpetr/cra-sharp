@@ -33,10 +33,6 @@ class Application {
     );
     this.storage.setItem(ACCESS_TOKEN, accessToken);
   }
-
-  hasAccessToken() {
-    return this.storage.getItem(ACCESS_TOKEN) !== null;
-  }
 }
 
 const application = new Application();

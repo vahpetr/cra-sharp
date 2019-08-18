@@ -5,14 +5,19 @@ import Button from '../components/Button';
 
 export default class ErrorPage extends React.Component {
   static propTypes = {
-    history: PropTypes.object.isRequired
+    history: PropTypes.shape({
+      push: PropTypes.func.isRequired
+    }).isRequired
   };
+
+  onLogin = () => this.props.history.push('/login');
+
   render() {
     return (
       <StyledContainer>
         <div>
-          <StyledMessage>Старница не найденна</StyledMessage>
-          <Button onClick={this.props.history.goBack}>Вернуться назад</Button>
+          <StyledMessage>В доступе отказано</StyledMessage>
+          <Button onClick={this.onLogin}>Вернуться на страницу входа</Button>
         </div>
       </StyledContainer>
     );

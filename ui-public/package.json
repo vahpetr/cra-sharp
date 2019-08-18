@@ -4,10 +4,10 @@
   "private": true,
   "dependencies": {
     "normalize.css": "8.0.1",
-    "react": "16.8.6",
-    "react-dom": "16.8.6",
-    "react-router-dom": "^5.0.1",
-    "react-scripts": "3.0.1",
+    "react": "16.9.0",
+    "react-dom": "16.9.0",
+    "react-router-dom": "5.0.1",
+    "react-scripts": "3.1.1",
     "styled-components": "4.3.2"
   },
   "devDependencies": {
@@ -20,9 +20,9 @@
     "stylelint-processor-styled-components": "1.8.0"
   },
   "scripts": {
-    "start": "REACT_APP_API_HOST=localhost:5000 react-scripts start",
+    "start": "PORT=3000 REACT_APP_API_HOST=http://localhost:5000 react-scripts start",
     "build": "GENERATE_SOURCEMAP=false react-scripts build",
-    "test": "REACT_APP_API_HOST=localhost:5000 CI=true react-scripts test --env=jsdom",
+    "test": "REACT_APP_API_HOST=http://localhost:5000 CI=true react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
     "lint": "eslint ./src/"
   },
@@ -40,5 +40,10 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "babelMacros": {
+    "styledComponents": {
+      "pure": true
+    }
   }
 }

@@ -1,5 +1,5 @@
 const META_DATA_HEADERS = {
-  'x-request-client-type': 'users-provider',
+  'x-request-client-type': 'data-provider',
   'x-request-client-version': '1.0'
 };
 
@@ -7,7 +7,7 @@ const JSON_HEADERS = {
   'content-type': 'application/json'
 };
 
-export default class UsersProvider {
+export default class DataProvider {
   _transport = null;
   _token = null;
 
@@ -27,10 +27,9 @@ export default class UsersProvider {
     };
   }
 
-  async logout(signal) {
-    return await this._transport.post('/api/users/logout', {
+  async getData(signal) {
+    return await this._transport.get('/api/data', {
       headers: this.secureHeaders(),
-      credentials: 'same-origin',
       signal
     });
   }

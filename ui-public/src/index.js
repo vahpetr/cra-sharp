@@ -1,16 +1,11 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import Application from './modules/Application';
 import App from './App';
 import config from './config';
 // import * as serviceWorker from 'serviceWorker';
 
 // eslint-disable-next-line no-console
 console.log(config);
-
-if (Application.hasAccessToken()) {
-  window.location.href = window.location.origin;
-}
 
 ReactDOM.render(<App />, document.getElementById('root'));
 
