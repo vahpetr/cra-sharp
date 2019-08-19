@@ -1,0 +1,60 @@
+version: "3.6"
+
+services:
+  db-users:
+    build: ./db-users
+    restart: always
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_PASSWORD=${DB_USERS_PASSWORD}
+      - POSTGRES_USER=${DB_USERS_USER}
+      - POSTGRES_DB=${DB_USERS_SCHEMA}
+    ports:
+      - ${DB_USERS_PORT}:5432
+    volumes:
+      - ./temp/users-db-config:/etc/postgresql
+      - ./temp/users-db-logs:/var/log/postgresql
+      - ./temp/users-db-data:/var/lib/postgresql/data
+
+  db-cache:
+    build: ./db-cache
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - ${DB_CACHE_PORT}:6379
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - REACT_APP_API_HOST=${REACT_APP_API_HOST}
+    restart: always
+    env_file:
+      - .env
+    environment:
+      - UsersSettings:ConnectionString=Host=db-users;Database=${DB_USERS_SCHEMA};Port=${DB_USERS_PORT};Username=${DB_USERS_USER};Password=${DB_USERS_PASSWORD};
+      - UsersSettings:MaxRetryCount=3
+      - UsersSettings:MaxRetryDelay=15
+      - UsersSettings:SecretKey=${USERSETTINGS_SECRETKEY}
+      - UsersSettings:Lifespan=60
+      - UsersSettings:Issuer=${REACT_APP_API_HOST}
+      - UsersSettings:Audience=${REACT_APP_API_HOST}
+      - UsersSettings:PublicUrl=${REACT_APP_API_HOST}
+      - CacheSettings:ConnectionString=db-cache:${DB_CACHE_PORT}
+      - CacheSettings:InstanceName=backend
+      - EmailSettings:Server=${EMAILSETTINGS_SERVER}
+      - EmailSettings:Port=${EMAILSETTINGS_PORT}
+      - EmailSettings:Name=${EMAILSETTINGS_NAME}
+      - EmailSettings:Email=${EMAILSETTINGS_EMAIL}
+      - EmailSettings:Password=${EMAILSETTINGS_PASSWORD}
+      - HealthChecks-UI:HealthChecks:0:Name=Backend
+      - HealthChecks-UI:HealthChecks:0:Uri=${REACT_APP_API_HOST}/hc
+    ports:
+      - ${BACKEND_HTTP_PORT}:80
+    depends_on:
+      - db-users
+      - db-cache
+      
