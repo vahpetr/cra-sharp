@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "cross-env": "5.2.0",
     "normalize.css": "8.0.1",
     "react": "16.9.0",
     "react-dom": "16.9.0",
@@ -20,9 +21,9 @@
     "stylelint-processor-styled-components": "1.8.0"
   },
   "scripts": {
-    "start": "PORT=3000 REACT_APP_API_HOST=http://localhost:5000 react-scripts start",
-    "build": "GENERATE_SOURCEMAP=false react-scripts build",
-    "test": "REACT_APP_API_HOST=http://localhost:5000 CI=true react-scripts test --env=jsdom",
+    "start": "cross-env PORT=3000 REACT_APP_API_HOST=http://localhost:5000 react-scripts start",
+    "build": "cross-env GENERATE_SOURCEMAP=false react-scripts build",
+    "test": "cross-env REACT_APP_API_HOST=http://localhost:5000 CI=true react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
     "lint": "eslint ./src/"
   },
