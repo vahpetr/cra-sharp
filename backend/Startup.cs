@@ -1,9 +1,8 @@
 using System;
 using System.Net;
 using AutoMapper;
-using backend.Services;
-using Backend.Data;
 using Backend.Services;
+using Backend.Data;
 using Backend.Services.EmailService;
 using Backend.Services.Exceptions;
 using Backend.Services.UserService;

@@ -6,7 +6,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
-using backend.Services;
 using Backend.Data;
 using Backend.Data.Models;
 using Backend.Services.EmailService;

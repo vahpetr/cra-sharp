@@ -11,8 +11,12 @@ I think in real application, you need to use Identity and a separate frontend pr
 
 ## TODO
 
-1. For load html need add [Cookie auth](https://oloshcoder.com/2018/05/21/jwt-token-with-cookie-authentication-in-asp-net-core/)
 1. Enable auto reconnect on redis
-1. Add more test
+1. Add [unit tests](https://docs.microsoft.com/ru-ru/aspnet/core/mvc/controllers/testing?view=aspnetcore-2.2)
+1. Add [e2e tests](https://docs.microsoft.com/ru-ru/aspnet/core/test/integration-tests?view=aspnetcore-2.2)
 1. [Add swagger](https://docs.microsoft.com/ru-ru/aspnet/core/tutorials/getting-started-with-swashbuckle?view=aspnetcore-2.2&tabs=visual-studio)
 1. [Add logging with ElasticSearch, Kibana](https://www.humankode.com/asp-net-core/logging-with-elasticsearch-kibana-asp-net-core-and-docker)
+
+## Docs
+
+1. [Other test information](https://docs.microsoft.com/ru-ru/dotnet/architecture/microservices/multi-container-microservice-net-applications/test-aspnet-core-services-web-apps)

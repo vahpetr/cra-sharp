@@ -2,7 +2,7 @@
 
 This part of the system includes private pages.
 
-## Run
+## How run
 
 ```bash
 npm install

@@ -1,4 +1,4 @@
-namespace backend.Services {
+namespace Backend.Services {
     public class LoggingEvents {
         public const int ProcessStarted = 1001;
 
