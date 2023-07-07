@@ -13,7 +13,7 @@
   "devDependencies": {
     "prettier-eslint": "9.0.0",
     "prettier-stylelint": "0.4.2",
-    "stylelint": "10.1.0",
+    "stylelint": "15.10.1",
     "stylelint-config-standard": "18.3.0",
     "stylelint-config-styled-components": "0.1.1",
     "stylelint-order": "3.0.1",
